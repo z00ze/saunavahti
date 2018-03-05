@@ -25,7 +25,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(pin,GPIO.OUT)
 
-starttemp = 0
+
 currenttemp = 0
 targettemp = 0
 lasttemp = 0
@@ -42,13 +42,12 @@ def setCurrentTemp():
     global currenttemp
     global temptime
     global lasttemp
-    currenttemp = 1+lasttemp
-#    while True:
-#        humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 4)
-#        if humidity is not None and temperature is not None:
-#            currenttemp = 1+int(temperature)
-#            lasttime = time.time()
-#            break
+    while True:
+        humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 4)
+        if humidity is not None and temperature is not None:
+            currenttemp = int(temperature)
+            lasttime = time.time()
+            break
 
 def getWhenDone():
     global active
@@ -57,37 +56,35 @@ def getWhenDone():
         global targettemp
         global lasttime
         global lasttemp
-        
         setCurrentTemp()
+        print str(targettemp)
+        print str(currenttemp)
         currenttime = time.time()
         last = lasttemp
         tempdif = currenttemp-lasttemp
         timedif = currenttime-lasttime
         k = tempdif / timedif
-        if k != 0:
-            donetime = tempdif / k
-            lasttemp = currenttemp
-            lasttime = currenttime
-            return '{"targettemp":"'+str(targettemp)+'","curremtemp":"'+str(currenttemp)+'","lasttemp":"'+str(last)+'","tempdif":"'+str(tempdif)+'","timedif":"'+str(timedif)+'","k":"'+str(k)+'","donetime":"'+str(donetime)+'","datetimeWhenDone":"'+datetime.datetime.fromtimestamp(currenttime+donetime).strftime('%Y-%m-%d %H:%M:%S')+'","currentTime":"'+datetime.datetime.fromtimestamp(currenttime).strftime('%Y-%m-%d %H:%M:%S')+'"}'
-        else:
-            return str(tempdif)+''+str(currenttemp)+' '+str(targettemp)
-            
+        if k == 0 or k < 0:
+            return '{"heat":"increase"}'
+        donetime = (targettemp - currenttemp)/k + currenttime
+        lasttemp = currenttemp
+        lasttime = currenttime
+        return '{"targettemp":"'+str(targettemp)+'","curremtemp":"'+str(currenttemp)+'","currenttime":"'+datetime.datetime.fromtimestamp(int(currenttime)).strftime('%Y-%m-%d %H:%M:%S')+'","whendone":"'+datetime.datetime.fromtimestamp(int(donetime)).strftime('%Y-%m-%d %H:%M:%S')+'","lasttemp":"'+str(last)+'","tempdif":"'+str(tempdif)+'","timedif":"'+str(timedif)+'","k":"'+str(k)+'"}'
+
 def takePicture():
     camera = picamera.PiCamera()
-    camera.capture('img.jpg')
+    camera.capture('/home/pi/saunavahti/images/img.jpg')
     return "Picture taken"
 
 def startSaunavahti():
     global active
     global lasttemp
     global lasttime
-    global starttemp
     if active is False:
         active = True
         ledOn()
         setCurrentTemp()
         lasttemp = int(getCurrentTemp())
-        starttemp = lasttemp
         return '{"result":"saunavahti started, target temperature is '+str(targettemp)+'"}'
     else:
         return '{"result":"sauna is already active"}'
@@ -99,11 +96,10 @@ def ledOff():
     GPIO.output(pin,GPIO.LOW)
     
 @cherrypy.expose
-class StringGeneratorWebService(object):
+class saunavahti(object):
 
-    @cherrypy.tools.accept(media='application/json')
     def GET(self):
-        return getCurrentTemp()
+        return '<html><body>'+getCurrentTemp()+'<br><img src="images/img.jpg"></body></html>'
     
     @cherrypy.tools.accept(media='application/json')
     def POST(self):
@@ -140,11 +136,9 @@ if __name__ == '__main__':
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True,
-            'tools.response_headers.on': True,
-            'tools.response_headers.headers': [('Content-Type', 'text/plain')],
         },
         '/images': {'tools.staticdir.on': True,
                       'tools.staticdir.dir': os.path.join(current_dir, 'images')}
     }
     cherrypy.config.update( {'server.socket_host': '0.0.0.0'} )
-    cherrypy.quickstart(StringGeneratorWebService(), '/', conf)
+    cherrypy.quickstart(saunavahti(), '/', conf)

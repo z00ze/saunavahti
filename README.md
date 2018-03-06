@@ -24,9 +24,11 @@ nykyisen ajanhetken lämpötilasta lasketaan edellisen ajanhetken lämpötilan k
 saavutus ajanhetki. Katsoin, että monimutkaisemman talon sisäilman lämpenemis funktion käyttäminen tässä työssä olisi liian työlästä.
 
 ### saunavahti.py rajapinta kuvaus
-<b>/ GET</b>
+<b>/ GET INTERFACE</b>
 Palauttaa lämpötilan ja viimeisimmän kuvan.
-<b>/ POST application/json</b>
+
+
+<b>/ POST application/json INTERCACES</b>
 
 POST - {"whendone":""}<br>
 RETURNS - data in json format

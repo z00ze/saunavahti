@@ -28,22 +28,22 @@ saavutus ajanhetki. Katsoin, että monimutkaisemman talon sisäilman lämpenemis
 Palauttaa lämpötilan ja viimeisimmän kuvan.
 <b>/ POST application/json</b>
 
-POST - {"whendone":""}
+POST - {"whendone":""}<br>
 RETURNS - data in json format
 
-POST - {"start":"","target":"targettemperature"}
+POST - {"start":"","target":"targettemperature"}<br>
 RETURNS - {"result":"saunavahti started, target temperature is targettemperature"} or {"result":"sauna is already active"}
 
-POST - {"settarget":"targettemperature"}
+POST - {"settarget":"targettemperature"}<br>
 RETURNS - {"result":"target temperature is now targettemperature"}
 
-POST - {"led":"on"}
+POST - {"led":"on"}<br>
 RETURNS - {"result":"led is on"}
 
-POST - {"led":"off"}
+POST - {"led":"off"}<br>
 RETURNS - {"result":"led is off"}
 
-POST - {"picture":"take"}
+POST - {"picture":"take"}<br>
 RETURNS - {"result":"Picture taken"}
 
 <img src="IMG_1094.jpg" width="250">

@@ -45,3 +45,5 @@ RETURNS - {"result":"led is off"}
 
 POST - {"picture":"take"}
 RETURNS - {"result":"Picture taken"}
+
+<img src="IMG_1094.jpg" width="250">

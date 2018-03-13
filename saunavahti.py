@@ -25,6 +25,8 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(pin,GPIO.OUT)
 
+#CAMERA
+camera = picamera.PiCamera()
 
 currenttemp = 0
 targettemp = 0
@@ -42,6 +44,11 @@ def setCurrentTemp():
     global currenttemp
     global temptime
     global lasttemp
+    # // for simulation //
+    lasttemp = currenttemp
+    currenttemp = lasttemp + 1
+    return
+    # // for simulation //
     while True:
         humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 4)
         if humidity is not None and temperature is not None:
@@ -57,8 +64,11 @@ def getWhenDone():
         global lasttime
         global lasttemp
         setCurrentTemp()
-        print str(targettemp)
-        print str(currenttemp)
+        takePicture()
+        if(currenttemp == targettemp):
+            ledOff()
+            active = False
+            return '{"whendone":"now"}'
         currenttime = time.time()
         last = lasttemp
         tempdif = currenttemp-lasttemp
@@ -72,7 +82,7 @@ def getWhenDone():
         return '{"targettemp":"'+str(targettemp)+'","curremtemp":"'+str(currenttemp)+'","currenttime":"'+datetime.datetime.fromtimestamp(int(currenttime)).strftime('%Y-%m-%d %H:%M:%S')+'","whendone":"'+datetime.datetime.fromtimestamp(int(donetime)).strftime('%Y-%m-%d %H:%M:%S')+'","lasttemp":"'+str(last)+'","tempdif":"'+str(tempdif)+'","timedif":"'+str(timedif)+'","k":"'+str(k)+'"}'
 
 def takePicture():
-    camera = picamera.PiCamera()
+    global camera
     camera.capture('/home/pi/saunavahti/images/img.jpg')
     return "Picture taken"
 

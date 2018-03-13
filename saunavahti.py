@@ -90,11 +90,12 @@ def startSaunavahti():
     global active
     global lasttemp
     global lasttime
+    global currenttemp
     if active is False:
         active = True
         ledOn()
-        setCurrentTemp()
-        lasttemp = int(getCurrentTemp())
+        currenttemp = int(getCurrentTemp())
+        lasttemp = currenttemp
         return '{"result":"saunavahti started, target temperature is '+str(targettemp)+'"}'
     else:
         return '{"result":"sauna is already active"}'
